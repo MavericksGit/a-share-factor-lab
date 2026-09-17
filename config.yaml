@@ -1,0 +1,49 @@
+# A股单因子研究工具配置文件
+
+data:
+  # sample：用本地合成数据离线跑通流程；fetch：用 AkShare 下载真实 A 股数据
+  mode: sample
+  # 下载真实数据时默认用哪个数据源：akshare 或 tushare
+  source: tushare
+  processed_dir: data/processed
+
+fetch:
+  index: "000300"        # 沪深300指数代码
+  max_stocks: 30         # 最多下载多少只股票，控制下载速度
+  start: "2024-06-01"
+  end: "2025-06-30"
+  adjust: "qfq"          # qfq = 前复权，保证分红除权不会造成价格跳空
+
+tushare:
+  url: ""                                          # 留空则从环境变量 TUSHARE_URL 读取
+  token_env: "TUSHARE_TOKEN"                      # token 从环境变量读取
+  index_code: "399300.SZ"                         # Tushare 里的沪深300代码
+  max_stocks: 300                                 # 300 = 沪深300全成分
+  start: "2020-01-01"
+  end: "2025-12-31"
+
+factors:
+  momentum_20: 20        # 20日动量
+  momentum_60: 60        # 60日动量
+  momentum_120: 120      # 120日动量
+  reversal_5: 5          # 5日反转
+  volatility_20: 20      # 20日波动率
+  turnover_20: 20        # 20日平均换手率
+
+preprocess:
+  winsorize: true        # 去极值
+  mad_n: 3               # 用 3 倍 MAD 截断
+  neutralize_size: true  # 市值中性化
+  neutralize_industry: true  # 行业中性化
+  standardize: true      # 标准化
+
+test:
+  forward_period: 1      # 未来收益用 T+1 日收益
+  quantiles: 5           # 分层回测分成 5 组
+
+portfolio:
+  factor: momentum_20    # 多空组合使用哪个因子
+  cost_rate: 0.0015      # 单边交易成本 0.15%
+
+report:
+  output_dir: output

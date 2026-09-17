@@ -1,0 +1,8 @@
+pandas
+numpy
+scipy
+matplotlib
+PyYAML
+akshare
+tushare
+tabulate
