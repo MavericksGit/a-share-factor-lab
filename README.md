@@ -65,6 +65,15 @@ python main.py --fetch --source tushare
 
 > 说明：真实行情数据不会提交到仓库，`data/processed/` 和 `output/` 已在 `.gitignore` 中忽略，需按上面脚本重新生成。
 
+## 示例结果
+
+下面是一次真实运行的输出（沪深300全成分、2020–2025 年，因子经过去极值、市值/行业中性化、标准化）：
+
+![因子分层回测](docs/layered_backtest.png)
+
+- 完整因子检验报告：[docs/report.md](docs/report.md)
+- 多空组合净值与回撤图：[docs/portfolio.png](docs/portfolio.png)
+
 ## 配置
 
 在 `config.yaml` 中可调整：股票池、回测区间、因子、预处理开关、分层组数、交易成本等。
