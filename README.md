@@ -36,7 +36,7 @@ a-share-factor-lab/
     └── report.py             # 报告与图表
 ```
 
-## 快速开始（离线，不需要联网）
+## 测试
 
 ```bash
 pip install -r requirements.txt
@@ -48,7 +48,7 @@ python main.py
 
 ## 使用真实数据（Tushare）
 
-先设置环境变量（token 不写进代码，避免泄露）：
+先设置环境变量：
 
 ```bash
 export TUSHARE_TOKEN="你的token"
@@ -63,11 +63,10 @@ python main.py --fetch --source tushare
 
 也可以切换回 AkShare：`python main.py --fetch --source akshare`。
 
-> 说明：真实行情数据不会提交到仓库，`data/processed/` 和 `output/` 已在 `.gitignore` 中忽略，需按上面脚本重新生成。
 
 ## 示例结果
 
-下面是一次真实运行的输出（沪深300全成分、2020–2025 年，因子经过去极值、市值/行业中性化、标准化）：
+沪深300全成分、2020–2025 年，因子经过去极值、市值/行业中性化、标准化：
 
 ![因子分层回测](docs/layered_backtest.png)
 
@@ -77,13 +76,3 @@ python main.py --fetch --source tushare
 ## 配置
 
 在 `config.yaml` 中可调整：股票池、回测区间、因子、预处理开关、分层组数、交易成本等。
-
-## 已知局限（学习用途）
-
-- 股票池采用期初固定成分快照，未做时点成分（point-in-time），存在选择偏差
-- 市值中性化使用静态市值近似
-- 分层回测未扣交易成本，且未做严格的停牌/幸存者偏差处理
-
-## 免责声明
-
-本项目仅用于量化学习，结果不代表任何投资建议，不能用于实盘决策。
