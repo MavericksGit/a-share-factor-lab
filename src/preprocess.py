@@ -70,23 +70,37 @@ def build_exposures(market_cap=None, industry=None, use_size=True, use_industry=
 
 
 def neutralize(factor, exposures):
-    """中性化：把因子对暴露变量做横截面回归，取残差，去掉市值/行业影响。"""
+    """中性化：把因子对暴露变量做横截面回归，取残差，去掉市值/行业影响。
+
+    逐日回归：每天只用当天非 NaN 的股票做 OLS，避免停牌股把 NaN 扩散到整个横截面。
+    """
     # 只保留同时出现在因子和暴露矩阵里的股票
     common = factor.columns.intersection(exposures.index)
     X = exposures.loc[common].copy()
     # 在最前面加一列常数 1，代表截距项
     X.insert(0, "const", 1.0)
     Xv = X.values.astype(float)
-    # 因子值矩阵：行是日期，列是股票
-    Y = factor[common].values.astype(float)
 
-    # 投影矩阵 P = X (X'X)^-1 X'，用它把 Y 投影到 X 张成的空间
-    # 因为暴露矩阵对每天都是同一个，所以 P 只需算一次，可以向量化处理所有日期
-    P = Xv @ np.linalg.pinv(Xv)
-    # 残差 = Y - Y 在 X 上的投影，即去掉了 X 能解释的部分
-    residual = Y - Y @ P.T
-    # 把残差转回 DataFrame，保持原来的日期索引和股票列
-    return pd.DataFrame(residual, index=factor.index, columns=common)
+    # 用字典保存每一天的残差
+    out = {}
+    # 逐日回归：iterrows 每次取一行，即某一天的横截面
+    for date, row in factor[common].iterrows():
+        # 当天所有股票的因子值（列向量）
+        y = row.values.astype(float)
+        # 找出当天非 NaN 的股票
+        valid = ~np.isnan(y)
+        # 有效股票数不足以回归（少于解释变量个数），这一天的残差全部记为 NaN
+        if valid.sum() <= Xv.shape[1]:
+            out[date] = pd.Series(np.nan, index=common)
+            continue
+        # 只用非 NaN 股票做最小二乘，求系数 β
+        beta, *_ = np.linalg.lstsq(Xv[valid], y[valid], rcond=None)
+        # 残差 = y - Xβ（对全部股票计算，停牌的 NaN 股票残差仍是 NaN）
+        residual = y - Xv @ beta
+        out[date] = pd.Series(residual, index=common)
+
+    # 字典转 DataFrame：行 = 日期，列 = 股票
+    return pd.DataFrame(out).T
 
 
 def preprocess(factor, config, exposures=None):
